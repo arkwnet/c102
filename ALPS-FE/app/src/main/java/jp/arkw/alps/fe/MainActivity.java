@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    private ArrayList<Item> items = new ArrayList<Item>();
+    private int total = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +21,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView textView = findViewById(R.id.text_view);
-        textView.setText("小計: ￥ 0");
+        textView.setText("小計: ￥ " + total);
+        items.add(new Item("ひらがないれーす", 100, R.drawable.gamecd));
+        items.add(new Item("ハコ単", 100, R.drawable.gamecd));
 
         ArrayList<Map<String, String>> listSelect = new ArrayList<>();
         ListView listViewSelect = findViewById(R.id.list_select);
@@ -32,11 +36,13 @@ public class MainActivity extends AppCompatActivity {
         ));
 
         ArrayList<Map<String, Object>> listItem = new ArrayList<>();
-        Map<String, Object> item = new HashMap<>();
-        item.put("name", "ひらがないれーす");
-        item.put("detail", "￥ 100");
-        item.put("image", R.drawable.gamecd);
-        listItem.add(item);
+        for (int i = 0; i < items.size(); i++) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", items.get(i).getName());
+            item.put("detail", "￥ " + items.get(i).getPrice());
+            item.put("image", items.get(i).getImage());
+            listItem.add(item);
+        }
         ListView listViewItem = findViewById(R.id.list_item);
         listViewItem.setAdapter(new SimpleAdapter(
             this,
