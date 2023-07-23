@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private ArrayList<Item> items = new ArrayList<>();
     private ArrayList<Map<String, String>> listSelect = new ArrayList<>();
     private SimpleAdapter simpleAdapter;
@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
             new String[] {"name", "detail", "image"},
             new int[] {R.id.name, R.id.detail, R.id.image}
         ));
-
         listViewItem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
@@ -64,7 +63,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.button_clear).setOnClickListener(this);
         update();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.button_clear) {
+            for (int i = 0; i < items.size(); i++) {
+                items.get(i).setQuantity(0);
+            }
+            total = 0;
+            update();
+        }
     }
 
     private void update() {

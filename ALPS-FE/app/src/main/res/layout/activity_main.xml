@@ -60,7 +60,7 @@
                 android:textSize="24sp" />
 
             <Button
-                android:id="@+id/button_cancel"
+                android:id="@+id/button_clear"
                 android:layout_width="100dp"
                 android:layout_height="80dp"
                 android:layout_marginLeft="5dp"
