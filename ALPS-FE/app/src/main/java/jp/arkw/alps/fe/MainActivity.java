@@ -14,8 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private ArrayList<Item> items = new ArrayList<Item>();
+    private ArrayList<Item> items = new ArrayList<>();
     private ArrayList<Map<String, String>> listSelect = new ArrayList<>();
+    private SimpleAdapter simpleAdapter;
+    private TextView textView;
     private int total = 0;
 
     @Override
@@ -23,19 +25,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView textView = findViewById(R.id.text_view);
-        textView.setText("小計: ￥ " + total);
         items.add(new Item("ひらがないれーす", 100, R.drawable.gamecd));
         items.add(new Item("ハコ単", 100, R.drawable.gamecd));
 
-        SimpleAdapter simpleAdapter = new SimpleAdapter(
-                this,
-                listSelect,
-                android.R.layout.simple_list_item_2,
-                new String[] {"name", "detail"},
-                new int[] {android.R.id.text1, android.R.id.text2}
-        );
+        textView = findViewById(R.id.text_view);
         ListView listViewSelect = findViewById(R.id.list_select);
+        simpleAdapter = new SimpleAdapter(
+            this,
+            listSelect,
+            android.R.layout.simple_list_item_2,
+            new String[] {"name", "detail"},
+            new int[] {android.R.id.text1, android.R.id.text2}
+        );
         listViewSelect.setAdapter(simpleAdapter);
 
         ArrayList<Map<String, Object>> listItem = new ArrayList<>();
@@ -59,14 +60,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
                 items.get(index).setQuantity(items.get(index).getQuantity() + 1);
-                updateListSelect();
-                simpleAdapter.notifyDataSetChanged();
+                update();
             }
         });
+
+        update();
     }
 
-    private void updateListSelect() {
+    private void update() {
         listSelect.clear();
+        total = 0;
         for (int i = 0; i < items.size(); i++) {
             Item item = items.get(i);
             if (item.getQuantity() >= 1) {
@@ -75,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
                 map.put("name", item.getName());
                 map.put("detail", "￥ " + item.getPrice() + " × " + item.getQuantity() + " = ￥ " + subtotal);
                 listSelect.add(map);
+                total += subtotal;
             }
         }
+        simpleAdapter.notifyDataSetChanged();
+        textView.setText("合計: ￥ " + total);
     }
 }
