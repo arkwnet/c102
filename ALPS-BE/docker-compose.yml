@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  app:
+    build: ./
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    environment:
+      - USER=user
+    command: sh -c "cargo run"
+    tty: true
+    ports:
+      - 3300:8080
