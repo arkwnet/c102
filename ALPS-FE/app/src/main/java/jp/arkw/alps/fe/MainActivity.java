@@ -3,6 +3,7 @@ package jp.arkw.alps.fe;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        findViewById(R.id.button_purchase).setOnClickListener(this);
         findViewById(R.id.button_card).setOnClickListener(this);
         findViewById(R.id.button_clear).setOnClickListener(this);
         update();
@@ -88,7 +90,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.button_card) {
+        if (v.getId() == R.id.button_purchase) {
+            Intent intent = new Intent(getApplication(), PurchaseActivity.class);
+            startActivity(intent);
+        } else if (v.getId() == R.id.button_card) {
             printImage(BitmapFactory.decodeResource(getResources(), R.drawable.card));
             feedPaper();
         } else if (v.getId() == R.id.button_clear) {

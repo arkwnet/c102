@@ -48,7 +48,7 @@
                 android:layout_width="140dp"
                 android:layout_height="80dp"
                 android:layout_marginLeft="5dp"
-                android:text="購入"
+                android:text="@string/main_purchase"
                 android:textSize="24sp" />
 
             <Button
@@ -56,7 +56,7 @@
                 android:layout_width="100dp"
                 android:layout_height="80dp"
                 android:layout_marginLeft="5dp"
-                android:text="名刺"
+                android:text="@string/main_card"
                 android:textSize="24sp" />
 
             <Button
@@ -65,7 +65,7 @@
                 android:layout_height="80dp"
                 android:layout_marginLeft="5dp"
                 android:backgroundTint="@android:color/darker_gray"
-                android:text="取消"
+                android:text="@string/main_clear"
                 android:textSize="24sp" />
 
         </LinearLayout>
