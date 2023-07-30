@@ -1,6 +1,7 @@
 use std::fs::File;
+use std::io::Read;
 use std::io::Write;
-use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,11 +15,19 @@ struct Display {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
   HttpServer::new(|| {
-    App::new().service(post_display)
+    App::new().service(get_display).service(post_display)
   })
   .bind(("app", 8080))?
   .run()
   .await
+}
+
+#[get("/display")]
+async fn get_display() -> HttpResponse {
+  let mut file = File::open("display.json").unwrap();
+  let mut buf = String::new();
+  let _ = file.read_to_string(&mut buf);
+  HttpResponse::Ok().content_type("application/json").body(buf)
 }
 
 #[post("/display")]
