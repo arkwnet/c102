@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -15,6 +17,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -25,7 +29,12 @@ import javax.net.ssl.X509TrustManager;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "GetWebApiActivity";
+    private Timer timer;
+    private TimerTask timerTask;
+    private Task task;
+    private boolean running = false;
     private String BACKEND_URL;
+    private LinearLayout linearLayout;
     private TextView textUpperLeft;
     private TextView textUpperRight;
     private TextView textLowerLeft;
@@ -35,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        linearLayout = findViewById(R.id.linear_layout);
         textUpperLeft = findViewById(R.id.text_upper_left);
         textUpperRight = findViewById(R.id.text_upper_right);
         textLowerLeft = findViewById(R.id.text_lower_left);
@@ -53,8 +63,18 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Task task = new Task();
-        task.execute(BACKEND_URL);
+        timer = new Timer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (running == false) {
+                    running = true;
+                    task = new Task();
+                    task.execute(BACKEND_URL);
+                }
+            }
+        };
+        timer.schedule(timerTask, 1000, 1000);
     }
 
     private class Task extends AsyncTask<String, Void, String> {
@@ -115,10 +135,16 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String str_recv) {
             try {
                 JSONObject json = new JSONObject(str_recv);
-                textUpperLeft.setText(json.getString("upper_left"));
-                textUpperRight.setText(json.getString("upper_right"));
-                textLowerLeft.setText(json.getString("lower_left"));
-                textLowerRight.setText(json.getString("lower_right"));
+                if (json.getString("upper_left").equals("") && json.getString("upper_right").equals("") && json.getString("lower_left").equals("") && json.getString("lower_right").equals("")) {
+                    linearLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.VISIBLE);
+                    textUpperLeft.setText(json.getString("upper_left"));
+                    textUpperRight.setText(json.getString("upper_right"));
+                    textLowerLeft.setText(json.getString("lower_left"));
+                    textLowerRight.setText(json.getString("lower_right"));
+                }
+                running = false;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
