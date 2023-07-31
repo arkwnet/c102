@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (v.getId() == R.id.button_purchase) {
             Intent intent = new Intent(getApplication(), PurchaseActivity.class);
+            intent.putExtra("total", total);
             startActivity(intent);
         } else if (v.getId() == R.id.button_card) {
             printImage(BitmapFactory.decodeResource(getResources(), R.drawable.card));
