@@ -20,7 +20,9 @@ import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.InnerResultCallback;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SimpleAdapter simpleAdapter;
     private TextView textView;
     private int total = 0;
+    private int id = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,17 +96,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.button_purchase) {
             Intent intent = new Intent(getApplication(), PurchaseActivity.class);
             intent.putExtra("total", total);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         } else if (v.getId() == R.id.button_card) {
             printImage(BitmapFactory.decodeResource(getResources(), R.drawable.card));
-            feedPaper();
+            feedPaper(5);
         } else if (v.getId() == R.id.button_clear) {
-            for (int i = 0; i < items.size(); i++) {
-                items.get(i).setQuantity(0);
-            }
-            total = 0;
-            update();
+            clearQuantity();
         }
+    }
+
+    private void clearQuantity() {
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).setQuantity(0);
+        }
+        total = 0;
+        update();
     }
 
     private void update() {
@@ -122,6 +129,93 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         simpleAdapter.notifyDataSetChanged();
         textView.setText("合計: ￥ " + total);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode == RESULT_OK) {
+            id++;
+            String payment = intent.getStringExtra("payment");
+            int cash = intent.getIntExtra("cash", 0);
+            int change = intent.getIntExtra("change", 0);
+            printImage(BitmapFactory.decodeResource(getResources(), R.drawable.receipt));
+            printText("ご購入になりました商品の\n", 0);
+            printText("サポート情報はこちら ↓\n", 0);
+            printText("https://arkw.work/doujin\n", 0);
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd(E) HH:mm");
+            printText("レジ0001 " + simpleDateFormat.format(date) + "\n", 0);
+            printText("取" + String.format("%04d", id) + " 責: 01 荒川\n\n", 0);
+            int total = 0;
+            for (int i = 0; i < items.size(); i++) {
+                final Item item = items.get(i);
+                if (item.getQuantity() >= 1) {
+                    printText("" + item.getName() + " × " + item.getQuantity() + "\n", 0);
+                    final int subtotal = item.getPrice() * item.getQuantity();
+                    total += subtotal;
+                    printText("" + subtotal + "\n", 2);
+                }
+            }
+            printText("----------------------------\n", 1);
+            printText("合計\n", 0);
+            printText("￥ " + total + "\n", 2);
+            if (payment == "現金") {
+                printText("お預かり\n", 0);
+            } else {
+                printText(payment + "\n", 0);
+            }
+            printText("￥ " + cash + "\n", 2);
+            printText("お釣り\n", 0);
+            printText("￥ " + change + "\n", 2);
+            printText("----------------------------\n", 1);
+            printText("Arakawa Laboratory\n", 0);
+            printText("Web: https://arkw.net/\n", 0);
+            printText("E-Mail: mail@arkw.net\n", 0);
+            printText("Twitter: @arkw0\n", 0);
+            printText("Misskey: @arkw@mi.arkw.work", 0);
+            feedPaper(5);
+            clearQuantity();
+        }
+    }
+
+    private void printText(String text, int alignment) {
+        try {
+            sunmiPrinterService.setAlignment(alignment, new InnerResultCallback() {
+                @Override
+                public void onRunResult(boolean isSuccess) throws RemoteException {
+                }
+                @Override
+                public void onReturnString(String result) throws RemoteException {
+                }
+                @Override
+                public void onRaiseException(int code, String msg) throws RemoteException {
+                }
+                @Override
+                public void onPrintResult(int code, String msg) throws RemoteException {
+                }
+            });
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        };
+        try {
+            sunmiPrinterService.printText(text, new InnerResultCallback() {
+                @Override
+                public void onRunResult(boolean isSuccess) throws RemoteException {
+                }
+                @Override
+                public void onReturnString(String result) throws RemoteException {
+                }
+                @Override
+                public void onRaiseException(int code, String msg) throws RemoteException {
+                }
+                @Override
+                public void onPrintResult(int code, String msg) throws RemoteException {
+                }
+            });
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        };
     }
 
     private void printImage(Bitmap bitmap) {
@@ -145,9 +239,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
     }
 
-    private void feedPaper() {
+    private void feedPaper(int n) {
         try {
-            sunmiPrinterService.lineWrap(5, new InnerResultCallback() {
+            sunmiPrinterService.lineWrap(n, new InnerResultCallback() {
                 @Override
                 public void onRunResult(boolean isSuccess) throws RemoteException {
                 }
