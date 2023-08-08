@@ -2,11 +2,16 @@ package jp.arkw.alps.fe;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
+
+import java.util.regex.Pattern;
 
 public class PurchaseActivity extends AppCompatActivity implements View.OnClickListener {
     private int total;
@@ -29,35 +34,71 @@ public class PurchaseActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(PurchaseActivity.this, MainActivity.class);
         if (v.getId() == R.id.button_payment_money) {
-            intent.putExtra("payment", getString(R.string.payment_money));
-            intent.putExtra("cash", 0);
-            intent.putExtra("change", 0);
-            setResult(RESULT_OK, intent);
+            LayoutInflater inflater = LayoutInflater.from(PurchaseActivity.this);
+            View view = inflater.inflate(R.layout.edit_dialog, null);
+            final EditText editText = (EditText)view.findViewById(R.id.edit_text);
+            new AlertDialog.Builder(PurchaseActivity.this)
+                .setTitle("預かり金額を入力")
+                .setView(view)
+                .setPositiveButton(
+                    "OK",
+                        (dialog, which) -> {
+                            String text = editText.getText().toString();
+                            if (isInteger(text) == true) {
+                                int cash = Integer.parseInt(text);
+                                if (cash >= 0 && cash < 99999 && total <= cash) {
+                                    int change = cash - total;
+                                    finishPurchase(getString(R.string.payment_money), cash, change);
+                                } else {
+                                    showAlert("入力値が不正です");
+                                }
+                            }
+                        })
+                .setNegativeButton(
+                    "キャンセル",
+                        (dialog, which) -> {
+                        })
+                .show();
         } else if (v.getId() == R.id.button_payment_credit) {
-            intent.putExtra("payment", getString(R.string.payment_credit));
-            intent.putExtra("cash", total);
-            intent.putExtra("change", 0);
-            setResult(RESULT_OK, intent);
+            finishPurchase(getString(R.string.payment_credit), total, 0);
         } else if (v.getId() == R.id.button_payment_quicpay) {
-            intent.putExtra("payment", getString(R.string.payment_quicpay));
-            intent.putExtra("cash", total);
-            intent.putExtra("change", 0);
-            setResult(RESULT_OK, intent);
+            finishPurchase(getString(R.string.payment_quicpay), total, 0);
         } else if (v.getId() == R.id.button_payment_id) {
-            intent.putExtra("payment", getString(R.string.payment_id));
-            intent.putExtra("cash", total);
-            intent.putExtra("change", 0);
-            setResult(RESULT_OK, intent);
+            finishPurchase(getString(R.string.payment_id), total, 0);
         } else if (v.getId() == R.id.button_payment_ic) {
-            intent.putExtra("payment", getString(R.string.payment_ic));
-            intent.putExtra("cash", total);
-            intent.putExtra("change", 0);
-            setResult(RESULT_OK, intent);
+            finishPurchase(getString(R.string.payment_ic), total, 0);
         } else if (v.getId() == R.id.button_cancel) {
-            setResult(RESULT_CANCELED, intent);
+            cancelPurchase();
         }
+    }
+
+    public void finishPurchase(String type, int cash, int change) {
+        Intent intent = new Intent(PurchaseActivity.this, MainActivity.class);
+        intent.putExtra("payment", type);
+        intent.putExtra("cash", cash);
+        intent.putExtra("change", change);
+        setResult(RESULT_OK, intent);
         finish();
+    }
+
+    public void cancelPurchase() {
+        Intent intent = new Intent(PurchaseActivity.this, MainActivity.class);
+        setResult(RESULT_CANCELED, intent);
+        finish();
+    }
+
+    public boolean isInteger(String text) {
+        Pattern pattern = Pattern.compile("^[0-9]+$|-[0-9]+$");
+        boolean res = pattern.matcher(text).matches();
+        return res;
+    }
+
+    public void showAlert(String text) {
+        new AlertDialog.Builder(this)
+            .setTitle("エラー")
+            .setMessage(text)
+            .setPositiveButton("OK", null)
+            .show();
     }
 }

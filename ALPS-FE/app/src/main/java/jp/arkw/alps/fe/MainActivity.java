@@ -157,10 +157,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     printText("" + subtotal + "\n", 2);
                 }
             }
-            printText("----------------------------\n", 1);
+            printLine();
             printText("合計\n", 0);
             printText("￥ " + total + "\n", 2);
-            if (payment == "現金") {
+            if (payment.equals(R.id.button_payment_money) == true) {
                 printText("お預かり\n", 0);
             } else {
                 printText(payment + "\n", 0);
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             printText("￥ " + cash + "\n", 2);
             printText("お釣り\n", 0);
             printText("￥ " + change + "\n", 2);
-            printText("----------------------------\n", 1);
+            printLine();
             printText("Arakawa Laboratory\n", 0);
             printText("Web: https://arkw.net/\n", 0);
             printText("E-Mail: mail@arkw.net\n", 0);
@@ -237,6 +237,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (RemoteException e) {
             e.printStackTrace();
         };
+    }
+
+    private void printLine() {
+        printText("--------------------------------\n", 1);
     }
 
     private void feedPaper(int n) {
