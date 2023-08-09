@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ALPS-FB</string>
+    <string name="main_purchase">購入</string>
+    <string name="main_card">名刺</string>
+    <string name="main_clear">取消</string>
+    <string name="purchase_total">合計金額</string>
+    <string name="purchase_select">決済方法を選択してください</string>
+    <string name="payment_money">現金</string>
+    <string name="payment_credit">クレジット・デビットカード</string>
+    <string name="payment_quicpay">QUICpay</string>
+    <string name="payment_id">iD</string>
+    <string name="payment_ic">交通系ICカード</string>
+    <string name="payment_cancel">キャンセル</string>
+</resources>

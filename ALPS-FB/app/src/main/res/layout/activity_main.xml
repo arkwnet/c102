@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <ListView
+            android:id="@+id/list_select"
+            android:layout_width="match_parent"
+            android:layout_height="180dp">
+
+        </ListView>
+
+        <TextView
+            android:id="@+id/text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:paddingStart="10dp"
+            android:text="TextView"
+            android:textColor="@color/white"
+            android:textSize="34sp" />
+
+        <ListView
+            android:id="@+id/list_item"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_purchase"
+                android:layout_width="140dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="5dp"
+                android:text="@string/main_purchase"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/button_card"
+                android:layout_width="100dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="5dp"
+                android:text="@string/main_card"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/button_clear"
+                android:layout_width="100dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="5dp"
+                android:backgroundTint="@android:color/darker_gray"
+                android:text="@string/main_clear"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
