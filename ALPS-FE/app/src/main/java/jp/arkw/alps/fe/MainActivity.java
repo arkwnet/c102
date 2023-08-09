@@ -20,6 +20,11 @@ import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.InnerResultCallback;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private Context context;
+    private File file;
+
     private SunmiPrinterService sunmiPrinterService;
     public static int NoSunmiPrinter = 0x00000000;
     public static int CheckSunmiPrinter = 0x00000001;
@@ -85,6 +93,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        context = getApplicationContext();
+        file = new File(context.getFilesDir(), "id.txt");
+        String text = null;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            text = bufferedReader.readLine();
+            id = Integer.parseInt(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         findViewById(R.id.button_purchase).setOnClickListener(this);
         findViewById(R.id.button_card).setOnClickListener(this);
         findViewById(R.id.button_clear).setOnClickListener(this);
@@ -136,6 +154,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, intent);
         if (resultCode == RESULT_OK) {
             id++;
+            if (id >= 10000) {
+                id = 0;
+            }
+            try (FileWriter writer = new FileWriter(file, false)) {
+                writer.write("" + id);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             String payment = intent.getStringExtra("payment");
             int cash = intent.getIntExtra("cash", 0);
             int change = intent.getIntExtra("change", 0);
