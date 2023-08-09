@@ -20,11 +20,16 @@ import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.InnerResultCallback;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +39,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
     private File file;
+    private String BACKEND_URL;
 
     private SunmiPrinterService sunmiPrinterService;
     public static int NoSunmiPrinter = 0x00000000;
@@ -54,6 +60,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initSunmiPrinterService(this);
+
+        try {
+            InputStream inputStream = this.getAssets().open("BACKEND_URL.env");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BACKEND_URL = bufferedReader.readLine();
+            inputStream.close();
+            bufferedReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        context = getApplicationContext();
+        file = new File(context.getFilesDir(), "id.txt");
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String text = bufferedReader.readLine();
+            id = Integer.parseInt(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         items.add(new Item("ひらがないれーす", 100, R.drawable.gamecd));
         items.add(new Item("ハコ単", 100, R.drawable.gamecd));
@@ -90,18 +115,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
                 items.get(index).setQuantity(items.get(index).getQuantity() + 1);
                 update();
+                setCustomerDisplay(items.get(index).getName(), "" + items.get(index).getPrice(), "小計", "" + total);
             }
         });
-
-        context = getApplicationContext();
-        file = new File(context.getFilesDir(), "id.txt");
-        String text = null;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
-            text = bufferedReader.readLine();
-            id = Integer.parseInt(text);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         findViewById(R.id.button_purchase).setOnClickListener(this);
         findViewById(R.id.button_card).setOnClickListener(this);
@@ -112,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button_purchase) {
+            setCustomerDisplay("", "", "合計", "" + total);
             Intent intent = new Intent(getApplication(), PurchaseActivity.class);
             intent.putExtra("total", total);
             startActivityForResult(intent, 1);
@@ -120,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             feedPaper(5);
         } else if (v.getId() == R.id.button_clear) {
             clearQuantity();
+            setCustomerDisplay("", "", "", "");
         }
     }
 
@@ -186,9 +204,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             printLine();
             printText("合計\n", 0);
             printText("￥ " + total + "\n", 2);
-            if (payment.equals(R.id.button_payment_money) == true) {
+            if (payment.equals(R.string.payment_money)) {
+                setCustomerDisplay("お預かり", "" + cash, "お釣り", "" + change);
                 printText("お預かり\n", 0);
             } else {
+                setCustomerDisplay(payment, "" + cash, "お釣り", "" + change);
                 printText(payment + "\n", 0);
             }
             printText("￥ " + cash + "\n", 2);
@@ -322,5 +342,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (InnerPrinterException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setCustomerDisplay(String upperLeft, String upperRight, String lowerLeft, String lowerRight) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("upper_left", upperLeft);
+            json.put("upper_right", upperRight);
+            json.put("lower_left", lowerLeft);
+            json.put("lower_right", lowerRight);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        new SendPostAsyncTask() {
+            @Override
+            protected void onPostExecute(String response) {
+                try {
+                    JSONObject respData = new JSONObject(response);
+                } catch (JSONException e) {
+                }
+            }
+        }.execute( new SendPostTaskParams(
+                BACKEND_URL,
+                json.toString()
+        ));
     }
 }
