@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   app:
-    build: ./
+    image: rust:latest
     volumes:
       - ./app:/app
     working_dir: /app
@@ -11,3 +11,5 @@ services:
     tty: true
     ports:
       - 3300:8080
+    environment:
+      TZ: Asia/Tokyo
