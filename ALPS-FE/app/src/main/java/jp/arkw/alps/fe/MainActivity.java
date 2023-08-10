@@ -20,6 +20,7 @@ import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.InnerResultCallback;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -183,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String payment = intent.getStringExtra("payment");
             int cash = intent.getIntExtra("cash", 0);
             int change = intent.getIntExtra("change", 0);
+            // レシート印刷
             printImage(BitmapFactory.decodeResource(getResources(), R.drawable.receipt));
             printText("ご購入になりました商品の\n", 0);
             printText("サポート情報はこちら ↓\n", 0);
@@ -221,6 +223,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             printText("Twitter: @arkw0\n", 0);
             printText("Misskey: @arkw@mi.arkw.work", 0);
             feedPaper(5);
+            // バックエンドに購買記録を送信
+            JSONArray jsonArray = new JSONArray();
+            for (int i = 0; i < items.size(); i++) {
+                JSONObject jsonObject = new JSONObject();
+                final Item item = items.get(i);
+                if (item.getQuantity() >= 1) {
+                    try {
+                        jsonObject.put("name", item.getName());
+                        jsonObject.put("price", "" + item.getPrice());
+                        jsonObject.put("quantity", "" + item.getQuantity());
+                        jsonArray.put(jsonObject);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            JSONObject json = new JSONObject();
+            try {
+                json.put("id", "" + id);
+                json.put("items", jsonArray);
+                json.put("total", "" + total);
+                json.put("payment", "" + payment);
+                json.put("cash", "" + cash);
+                json.put("change", "" + change);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            sendPost("/record", json);
             clearQuantity();
         }
     }
@@ -354,6 +384,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+        sendPost("/display", json);
+    }
+
+    private void sendPost(String url, JSONObject json) {
         new SendPostAsyncTask() {
             @Override
             protected void onPostExecute(String response) {
@@ -363,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }.execute( new SendPostTaskParams(
-                BACKEND_URL,
+                BACKEND_URL + url,
                 json.toString()
         ));
     }
