@@ -6,10 +6,8 @@ services:
       - ./app:/app
     working_dir: /app
     environment:
-      - USER=user
+      TZ: Asia/Tokyo
     command: sh -c "cargo run"
     tty: true
     ports:
       - 3300:8080
-    environment:
-      TZ: Asia/Tokyo
